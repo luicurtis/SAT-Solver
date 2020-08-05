@@ -2,6 +2,7 @@
     are chosen uniformly, independently, and without replacement from 
     among all clauses with k different literals, which are positive or 
     negative at random'''
+
 import sys
 import os
 import random
@@ -33,10 +34,12 @@ def k_cnf():
     
     if len(argumentList) != 3:
         print("ERROR: k-cnf requires 3 inputs in the format: python3 k-cnf.py [k] [m] [n]")
+        print("Where: \n    k = number of literals per clause \n    m = number of clauses \n    n = number of variables")
         return
 
     if not all(x > 0 for x in argumentList):
         print("ERROR: inputs [k], [m], and [n] must be positive integers")
+        print("Where: \n    k = number of literals per clause \n    m = number of clauses \n    n = number of variables")
         return
 
     numLiterals = argumentList[0]   # k
