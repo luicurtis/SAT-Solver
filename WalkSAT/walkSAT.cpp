@@ -22,7 +22,7 @@ WalkSAT::~WalkSAT()
  * 
  * Return: a map that is the model of each variable and it's value
  */
-map<int, bool> solve(char* filePathtoKB)
+map<int, bool> solve(int p, int max_flips)
 {
     
 }
@@ -34,4 +34,11 @@ void displayModel(map<int, bool>& model)
 }
 
 /* Returns true if the model is satisfied */
-bool checkModel(map<int, bool>& model);
+bool checkModel(map<int, bool>& model)
+{
+
+}
+
+/* Loads a KB from a given filePath*/
+void loadKB(char* filePath);
+
