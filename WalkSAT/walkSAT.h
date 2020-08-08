@@ -14,7 +14,7 @@ class WalkSAT {
 
         map<int, bool> solve(int p, int max_flips);
         void displayModel(map<int, bool>& model);
-        bool checkModel(map<int, bool>& model);
+        bool checkModel(const map<int, bool>& model);
     
     private:
         int numClauses;
@@ -24,6 +24,7 @@ class WalkSAT {
 
         void loadKB(char* filePath);
         int satCount(map<int, bool>& model, int symbol);
+        bool checkClause(const vector<int>& clause, const map<int, bool>& model);
 
         // Helper Functions
         vector<string> split(const string &s, char delimiter) const;

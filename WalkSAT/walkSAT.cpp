@@ -36,13 +36,20 @@ void WalkSAT::displayModel(map<int, bool>& model)
 {
     for (int i = 0; i < numVariables; i++) {
         // print the postitive version of the int unless it's negated
-        cout << (i ?  model[i] : i * -1) << " ";
+        cout << (i ? model[i] : i * -1) << " ";
     }
 }
 
-/* Returns true if the model is satisfied */
-bool WalkSAT::checkModel(map<int, bool>& model)
+/* Returns true if the model satisfies all the clauses */
+bool WalkSAT::checkModel(const map<int, bool>& model)
 {
+    for (auto it = allClauses.begin(); it != allClauses.end(); it++) {
+        if (!checkClause(it->second, model)) {
+            // if model does not satisfy the clause
+            return false;
+        }
+    }
+    return true;
 
 }
 
@@ -98,7 +105,26 @@ void WalkSAT::loadKB(char* filePath)
     in_file.close();
 }
 
+int WalkSAT::satCount(map<int, bool>& model, int symbol)
+{
 
+}
+
+/* Check if the given clause is satisfied by the model */
+bool WalkSAT::checkClause(const vector<int>& clause, const map<int, bool>& model)
+{
+    // Loop through all variables in the clause to check if any are true and match
+    for (auto it = clause.begin(); it != clause.end(); it++) {
+        /* clause is true if:
+         * - *it is positive and the model for that variable is true OR
+         * - *it is negative and the model for that varaible is false*/
+        if ((*it > 0 && model.at(abs(*it))) || (*it > 0 && !(model.at(abs(*it))))) {
+            // Note: only one of the variables in each clause need to be true
+            return true;
+        }
+    }
+    return false;
+}
 /* Returns a vector of tokens from s that is split by the specified delimiter */
 vector<string> WalkSAT::split(const string &s, char delimiter) const
 {
