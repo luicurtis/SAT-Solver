@@ -34,7 +34,10 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
 /* Displays the variable and assignment */
 void WalkSAT::displayModel(map<int, bool>& model)
 {
-
+    for (int i = 0; i < numVariables; i++) {
+        // print the postitive version of the int unless it's negated
+        cout << (i ?  model[i] : i * -1) << " ";
+    }
 }
 
 /* Returns true if the model is satisfied */
@@ -61,6 +64,7 @@ void WalkSAT::loadKB(char* filePath)
 {
     string newLine;
     ifstream in_file (filePath, ifstream::in);
+
     if (!(in_file.is_open())) {
         cout << "ERROR: Could not open: " << filePath << "\n";
         exit(EXIT_FAILURE);
@@ -78,16 +82,27 @@ void WalkSAT::loadKB(char* filePath)
     numClauses = stoi(tokens[3]);
 
     // Go through the clauses
-    
-        
+    for (int i = 0; i < numClauses; i++) {
+        getline(in_file, newLine);
+        tokens = split(newLine, ' ');
+
+        vector<int> clause;
+        // convert tokens into integers and put into clause map
+        for (int j = 0; j < tokens.size(); j++) {
+            clause.push_back(stoi(tokens[j]));
+        }
+        // Note: i in this for loop uniquely identifies each clause
+        pair<int, vector<int>> newClause = make_pair(i, clause);
+        allClauses.insert(newClause);
+    }
+    in_file.close();
 }
 
 
 /* Returns a vector of tokens from s that is split by the specified delimiter */
-const vector<string> WalkSAT::split(const string &s, char delimiter)
+vector<string> WalkSAT::split(const string &s, char delimiter) const
 {
     vector<string> tokens;
-
     int begIndex = 0;
     int subStrLen = 0;
 

@@ -19,16 +19,14 @@ class WalkSAT {
     private:
         int numClauses;
         int numVariables;
-        map<string, vector<int>> allClauses;
-        vector<string> unsatClauses;
+        map<int, vector<int>> allClauses;   // the int uniquely idenfities each clause
+        vector<int> unsatClauses;           // the int uniquely idenfities each clause
 
         void loadKB(char* filePath);
         int satCount(map<int, bool>& model, int symbol);
 
         // Helper Functions
-        const vector<string> split(const string &s, char delimiter);
+        vector<string> split(const string &s, char delimiter) const;
 };
-
-
 
 #endif
