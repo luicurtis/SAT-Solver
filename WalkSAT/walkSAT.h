@@ -24,6 +24,11 @@ class WalkSAT {
 
         void loadKB(char* filePath);
         int satCount(map<int, bool>& model, int symbol);
+
+        // Helper Functions
+        const vector<string> split(const string &s, char delimiter);
 };
+
+
 
 #endif
