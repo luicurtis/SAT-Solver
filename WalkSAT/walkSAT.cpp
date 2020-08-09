@@ -99,27 +99,6 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
     return model;
 }
 
-/* Displays the variable and assignment */
-void WalkSAT::displayModel(map<int, bool>& model)
-{
-    for (int i = 0; i < numVariables; i++) {
-        // print the postitive version of the int unless it's negated
-        cout << (i ? model[i] : i * -1) << " ";
-    }
-}
-
-/* Returns true if the model satisfies all the clauses */
-bool WalkSAT::checkModel(const map<int, bool>& model)
-{
-    for (auto it = allClauses.begin(); it != allClauses.end(); it++) {
-        if (!checkClause(it->second, model)) {
-            // if model does not satisfy the clause
-            return false;
-        }
-    }
-    return true;
-}
-
 /* Loads a KB from a given filePath
  *
  * Note: This function does not check for validity of the input file
@@ -171,6 +150,28 @@ void WalkSAT::loadKB(char* filePath)
     }
     in_file.close();
 }
+
+/* Displays the variable and assignment */
+void WalkSAT::displayModel(map<int, bool>& model)
+{
+    for (int i = 0; i < numVariables; i++) {
+        // print the postitive version of the int unless it's negated
+        cout << (i ? model[i] : i * -1) << " ";
+    }
+}
+
+/* Returns true if the model satisfies all the clauses */
+bool WalkSAT::checkModel(const map<int, bool>& model)
+{
+    for (auto it = allClauses.begin(); it != allClauses.end(); it++) {
+        if (!checkClause(it->second, model)) {
+            // if model does not satisfy the clause
+            return false;
+        }
+    }
+    return true;
+}
+
 
 /* Return the number of clauses satisfied by flipping the specified symbol*/
 int WalkSAT::satCount(map<int, bool> &model, int symbol)
