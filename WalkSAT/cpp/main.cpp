@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     //     }
     // }
     
-    if (!walksat->checkModel(result)) {
+    if (!(result[0])) {
         cout << "ERROR: Result does not satisfy the problem\n";
     }
     delete walksat;

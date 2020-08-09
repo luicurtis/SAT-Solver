@@ -57,13 +57,13 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
     int numFlips = 0;
 
     while (numFlips < max_flips) {
-        cout << "\nNUM FLIPS: " << numFlips << endl; 
         if (unsatClauses.size() == 0) {
             return model;
         }
 
         // Choose a random clause from unsat list
-        vector<int> chosenClause = allClauses[rand() % unsatClauses.size()];
+        int unsat_index = unsatClauses[rand() % unsatClauses.size()];
+        vector<int> chosenClause = allClauses[unsat_index];
 
         // https://stackoverflow.com/questions/5886987/true-or-false-output-based-on-a-probability
         default_random_engine rand_engine;
@@ -139,16 +139,21 @@ void WalkSAT::loadKB(char* filePath)
     numVariables = stoi(tokens[2]);
     numClauses = stoi(tokens[3]);
 
+    // cout<<numVariables<<endl;
+    // cout<<numClauses<<endl;
+
     // Go through the clauses
     for (int i = 0; i < numClauses; i++) {
         getline(in_file, newLine);
         tokens = split(newLine, ' ');
-
+    
         vector<int> clause;
         // convert tokens into integers and put into clause map
         for (int j = 0; j < tokens.size(); j++) {
             clause.push_back(stoi(tokens[j]));
         }
+        
+
         // Note: i in this for loop uniquely identifies each clause
         pair<int, vector<int>> newClause = make_pair(i, clause);
         allClauses.insert(newClause);
