@@ -115,16 +115,20 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
  * */
 void WalkSAT::loadKB(char* filePath)
 {
+    
     string newLine;
-    ifstream in_file (filePath, ifstream::in);
-
+    ifstream in_file (filePath);
+    
     if (!(in_file.is_open())) {
         cout << "ERROR: Could not open: " << filePath << "\n";
         exit(EXIT_FAILURE);
     }
 
+    cout << "File Path: " << filePath << endl;
+
     // get the "p" line
     getline(in_file, newLine);
+    
     vector<string> tokens = split(newLine, ' ');
     // Example  p cnf 30 100
     if (tokens[0] != "p" || tokens[1].compare("cnf")) {
@@ -133,6 +137,9 @@ void WalkSAT::loadKB(char* filePath)
     }
     numVariables = stoi(tokens[2]);
     numClauses = stoi(tokens[3]);
+
+    // cout << "numvariables: " << numVariables << endl;
+    // cout << "numClauses: " << numClauses << endl;
 
     // Go through the clauses
     for (int i = 0; i < numClauses + 1; i++) {
@@ -147,6 +154,7 @@ void WalkSAT::loadKB(char* filePath)
         // Note: i in this for loop uniquely identifies each clause
         pair<int, vector<int>> newClause = make_pair(i, clause);
         allClauses.insert(newClause);
+        
     }
     in_file.close();
 }
@@ -234,10 +242,16 @@ vector<string> WalkSAT::split(const string &s, char delimiter) const
     vector<string> tokens;
     int begIndex = 0;
     int subStrLen = 0;
+    cout << "s.length(): " << s.length() << endl;
+
+    
 
     for (int i = 0; i < s.length(); i++) {
-        if (s[i] == delimiter) {
+        // cout << i << endl;
+        // cout << s[i] << endl;
+        if (s[i] == delimiter || s[i] == '\n') {
             string subString = s.substr(begIndex, subStrLen);
+            cout << subString << endl;
             tokens.push_back(subString);
             begIndex = i + 1;
             subStrLen = 0;
@@ -246,6 +260,11 @@ vector<string> WalkSAT::split(const string &s, char delimiter) const
             subStrLen++;
         }
     }
+
+    string subString = s.substr(begIndex, subStrLen);
+    cout << subString << endl;
+    tokens.push_back(subString);
+
     return tokens;
 }
 

@@ -74,7 +74,6 @@ def k_cnf():
         newClause = generate_unique_random_clause(clauses, variables, numLiterals)
         clauses.append(newClause)
         # write new clause into the file?
-        print("Clauses:", clauses)
 
         for j in range(numLiterals):
             f.write("%s " % newClause[j])
