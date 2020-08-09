@@ -12,7 +12,7 @@ class WalkSAT {
         WalkSAT();
         ~WalkSAT();
 
-        map<int, bool> solve(int p, int max_flips);
+        map<int, bool> solve(double p, int max_flips);
         void loadKB(char* filePath);
         void displayModel(map<int, bool> &model);
         bool checkModel(const map<int, bool> &model);

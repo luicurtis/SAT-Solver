@@ -30,7 +30,7 @@ WalkSAT::~WalkSAT()
  * 
  * Return: a map that is the model of each variable and it's value
  */
-map<int, bool> WalkSAT::solve(int p, int max_flips)
+map<int, bool> WalkSAT::solve(double p, int max_flips)
 {
     srand(time(0)); // for rand set up the seed
 
@@ -46,15 +46,31 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
             model[i] = false;
         }
     }
-
+    
     // Determine Unsat Clauses
     for (int i = 0; i < numClauses; i++) {
-        if (!checkClause(allClauses[i], model)) {
+        // for (int j = 0; j < allClauses[i].size(); j ++) {
+        //     cout << allClauses[i][j] << " ";
+        // }
+        // cout << endl;
+        // for (int j = 0; j < allClauses[i].size(); j ++) {
+        //         cout << allClauses[i][j] << " ";
+        //     }
+        //     cout << endl;
+        if (!(checkClause(allClauses[i], model))) {
+            // clause not satisfied
+            // cout << "not satisfied";
             unsatClauses.push_back(i); // note: i is the unique identifier for that clause
+          
+            // cout << endl;
+            // exit(EXIT_FAILURE);
         }
     }
 
     int numFlips = 0;
+    // https://stackoverflow.com/questions/20309009/get-true-or-false-with-a-given-probability/20309151
+    default_random_engine rand_engine;
+    uniform_real_distribution<double> uniform_zero_to_one(0.0, 1.0);
 
     while (numFlips < max_flips) {
         if (unsatClauses.size() == 0) {
@@ -65,41 +81,52 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
         int unsat_index = unsatClauses[rand() % unsatClauses.size()];
         vector<int> chosenClause = allClauses[unsat_index];
 
-        // https://stackoverflow.com/questions/5886987/true-or-false-output-based-on-a-probability
-        default_random_engine rand_engine;
-        uniform_real_distribution<> uniform_zero_to_one(0.0, 1.0);
-
         // Randomly pick flipping algorithm with probability p
         int chosenVariable;
 
-        if (uniform_zero_to_one(rand_engine) > p) {
+        auto prob = uniform_zero_to_one(rand_engine);
+
+        if (prob > p) {
             // flip a random symbol in the clause
             chosenVariable = chosenClause[rand() % chosenClause.size()];
         }
         else {
             // flip the symbol that maximizes the number of sat clauses
-            int satClauseCount = 0; // initialize as the least number of possible satisfied clauses
+            int satClauseCount = -1; // initialize as the least number of possible satisfied clauses
+            int tempVar;
 
             // Loop through each variable in the clause and flip. Compare number of sat clauses
             for (int i = 0; i < chosenClause.size(); i++) {
-                int tempVar = abs(chosenClause[i]);
-                int tempCount = satCount(model, tempVar);
+                tempVar = abs(chosenClause[i]);
+                if (tempVar != 0) {
+                    // cout << "TEMP VAR: " << tempVar <<endl;
 
-                if (tempCount > satClauseCount) {
-                    satClauseCount = tempCount;
-                    chosenVariable = tempVar;
+                    int tempCount = satCount(model, tempVar);
+
+                    // cout << "TEMP COUNT: "<<tempCount << endl;
+                    if (tempCount > satClauseCount) {
+                        // cout << "UPDATING SAT COUNT\n";
+                        satClauseCount = tempCount;
+                        chosenVariable = tempVar;
+                        // cout << "SATCLAUSECOUNT: " << satClauseCount << endl;
+                    }
                 }
-            }   
-        }
+                
+            }
 
+            // cout << "SATCLAUSECOUNT AFTER MAXIMIZING: " << satClauseCount << endl;  
+            // cout << "CHOSEN VAR TO FLIP: " << chosenVariable << endl;
+            
+        }
+        
         model[chosenVariable] = !model[chosenVariable];     // flip variable
         updateUnsatList(model, chosenVariable);
         numFlips++;
     }
 
     // no solution found
+    cout << "No solution for the SAT problem found\n";
     model.clear();
-    model[0] = false;
     return model;
 }
 
@@ -165,10 +192,18 @@ void WalkSAT::loadKB(char* filePath)
 /* Displays the variable and assignment */
 void WalkSAT::displayModel(map<int, bool>& model)
 {
-    for (int i = 0; i < numVariables; i++) {
-        // print the postitive version of the int unless it's negated
-        cout << (i ? model[i] : i * -1) << " ";
+    cout << "Result: ";
+    for (int i = 1; i < numVariables + 1; i++) {
+        if (model[i]) {
+            
+            cout <<  i;
+        }
+        else {
+            cout << "-" << i;
+        }
+        cout << " ";
     }
+    cout << endl;
 }
 
 /* Returns true if the model satisfies all the clauses */
@@ -188,7 +223,6 @@ bool WalkSAT::checkModel(const map<int, bool>& model)
 int WalkSAT::satCount(map<int, bool> &model, int symbol)
 {
     int count = 0;
-
     model[symbol] = !model[symbol]; // flip the symbol
     
     // loop through all clauses and check if they are satisifed by the current model
@@ -211,30 +245,46 @@ bool WalkSAT::checkClause(const vector<int>& clause, const map<int, bool>& model
         /* clause is true (satisfied) if:
          * - *it is positive and the model for that variable is true OR
          * - *it is negative and the model for that varaible is false*/
-        if ((*it > 0 && model.at(abs(*it))) || (*it > 0 && !(model.at(abs(*it))))) {
+        // cout << "current *it: " << *it << endl;
+        // cout << "model.at(abs(*it))): " << model.at(abs(*it)) << endl;
+        // cout << "(*it > 0 && model.at(abs(*it): " << (*it > 0 && model.at(abs(*it) ))<< endl;
+        // cout << "(*it > 0 && !(model.at(abs(*it)): " << (*it > 0 && !(model.at(abs(*it)))) << endl;
+        if ((*it > 0 && model.at(abs(*it))) || 
+            (*it < 0 && !(model.at(abs(*it))))) {
             // Note: only one of the variables in each clause need to be true
+            
+            // cout << "satisfied\n";
             return true;
         }
     }
+    // cout << "NOT satisfied\n";
     return false;
 }
 
 void WalkSAT::updateUnsatList(map<int, bool> &model, int flippedSymbol)
 {
     // Find all clauses with the flippedSymbol and update the unsatList
-    for (auto it = allClauses.begin(); it != allClauses.end(); it++) {
-        if (symbolInClause(it->second, flippedSymbol)) {
-            if (checkClause(it->second, model)) {
-                for (auto unsat_it = unsatClauses.begin(); unsat_it != unsatClauses.end(); unsat_it++) {
-                    // Check to see if the clause is in the unsat list
-                    if (*unsat_it == it->first) {
-                    unsatClauses.erase(unsat_it); // remove the clause from the unsat list because it is satisfied
-                    }
-                }
-            }
-            else {
-                unsatClauses.push_back(it->first); // add clause to list if it isnt satisfied
-            }
+    // for (auto it = allClauses.begin(); it != allClauses.end(); it++) {
+    //     if (symbolInClause(it->second, flippedSymbol)) {
+    //         if (checkClause(it->second, model)) {               
+    //             for (auto unsat_it = unsatClauses.begin(); unsat_it != unsatClauses.end(); unsat_it++) {
+    //                 // Check to see if the clause is in the unsat list
+    //                 if (*unsat_it == it->first) {
+    //                     cout << "ERASING\n";
+    //                     unsatClauses.erase(unsat_it); // remove the clause from the unsat list because it is satisfied
+    //                 }
+    //             }
+    //         }
+    //         else {
+    //             unsatClauses.push_back(it->first); // add clause to list if it isnt satisfied
+    //         }
+    //     }
+    // }
+    unsatClauses.clear();
+    // Determine Unsat Clauses
+    for (int i = 0; i < numClauses; i++) {
+        if (!checkClause(allClauses[i], model)) {
+            unsatClauses.push_back(i); // note: i is the unique identifier for that clause
         }
     }
 }
