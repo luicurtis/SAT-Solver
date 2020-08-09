@@ -25,9 +25,11 @@ class WalkSAT {
         void loadKB(char* filePath);
         int satCount(map<int, bool> &model, int symbol);
         bool checkClause(const vector<int> &clause, const map<int, bool> &model);
+        void updateUnsatList(map<int, bool> &model, int flippedSymbol);
 
         // Helper Functions
         vector<string> split(const string &s, char delimiter) const;
+        bool symbolInClause(vector<int>& clause, int symbol) const;
 };
 
 #endif

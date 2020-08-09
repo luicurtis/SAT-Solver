@@ -6,6 +6,7 @@
 #include <time.h>
 #include <cstdlib>
 #include <random>
+#include <algorithm>
 
 #include "walkSAT.h"
 
@@ -75,7 +76,7 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
             // flip the symbol that maximizes the number of sat clauses
             int satClauseCount = 0; // initialize as the least number of possible satisfied clauses
 
-            // Loop through each variable in the clause and compare number of sat clauses
+            // Loop through each variable in the clause and flip. Compare number of sat clauses
             for (int i = 0; i < chosenClause.size(); i++) {
                 int tempVar = abs(chosenClause[i]);
                 int tempCount = satCount(model, tempVar);
@@ -88,6 +89,7 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
         }
 
         model[chosenVariable] = !model[chosenVariable];     // flip variable
+        updateUnsatList(model, chosenVariable);
         numFlips++;
     }
 
@@ -116,7 +118,6 @@ bool WalkSAT::checkModel(const map<int, bool>& model)
         }
     }
     return true;
-
 }
 
 /* Loads a KB from a given filePath
@@ -206,6 +207,26 @@ bool WalkSAT::checkClause(const vector<int>& clause, const map<int, bool>& model
     return false;
 }
 
+void WalkSAT::updateUnsatList(map<int, bool> &model, int flippedSymbol)
+{
+    // Find all clauses with the flippedSymbol and update the unsatList
+    for (auto it = allClauses.begin(); it != allClauses.end(); it++) {
+        if (symbolInClause(it->second, flippedSymbol)) {
+            if (checkClause(it->second, model)) {
+                for (auto unsat_it = unsatClauses.begin(); unsat_it != unsatClauses.end(); unsat_it++) {
+                    // Check to see if the clause is in the unsat list
+                    if (*unsat_it == it->first) {
+                    unsatClauses.erase(unsat_it); // remove the clause from the unsat list because it is satisfied
+                    }
+                }
+            }
+            else {
+                unsatClauses.push_back(it->first); // add clause to list if it isnt satisfied
+            }
+        }
+    }
+}
+
 /* Returns a vector of tokens from s that is split by the specified delimiter */
 vector<string> WalkSAT::split(const string &s, char delimiter) const
 {
@@ -225,4 +246,15 @@ vector<string> WalkSAT::split(const string &s, char delimiter) const
         }
     }
     return tokens;
+}
+
+/* Returns True if the symbol is in the clause, else false */
+bool WalkSAT::symbolInClause(vector<int>& clause, int symbol) const
+{
+    for (int i = 0; i < clause.size(); i++) {
+        if (abs(clause[i]) == symbol) {
+            return true;
+        }
+    }
+    return false;
 }
