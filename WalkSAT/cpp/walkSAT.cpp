@@ -35,9 +35,11 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
     srand(time(0)); // for rand set up the seed
 
     map<int, bool> model;   // note: int cannot be 0
+    model[0] = true;
     // give random asignments for all the symbols
-    for (int i = 1; i < numClauses + 1; i++) {
-        if (rand() % 1) {
+    for (int i = 1; i < numVariables + 1; i++) {
+        if (rand() % 2 == 0) {
+            
             model[i] = true;
         }
         else {
@@ -51,9 +53,11 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
             unsatClauses.push_back(i); // note: i is the unique identifier for that clause
         }
     }
+
     int numFlips = 0;
 
     while (numFlips < max_flips) {
+        cout << "\nNUM FLIPS: " << numFlips << endl; 
         if (unsatClauses.size() == 0) {
             return model;
         }
@@ -115,7 +119,6 @@ map<int, bool> WalkSAT::solve(int p, int max_flips)
  * */
 void WalkSAT::loadKB(char* filePath)
 {
-    
     string newLine;
     ifstream in_file (filePath);
     
@@ -123,8 +126,6 @@ void WalkSAT::loadKB(char* filePath)
         cout << "ERROR: Could not open: " << filePath << "\n";
         exit(EXIT_FAILURE);
     }
-
-    cout << "File Path: " << filePath << endl;
 
     // get the "p" line
     getline(in_file, newLine);
@@ -138,11 +139,8 @@ void WalkSAT::loadKB(char* filePath)
     numVariables = stoi(tokens[2]);
     numClauses = stoi(tokens[3]);
 
-    // cout << "numvariables: " << numVariables << endl;
-    // cout << "numClauses: " << numClauses << endl;
-
     // Go through the clauses
-    for (int i = 0; i < numClauses + 1; i++) {
+    for (int i = 0; i < numClauses; i++) {
         getline(in_file, newLine);
         tokens = split(newLine, ' ');
 
@@ -242,16 +240,13 @@ vector<string> WalkSAT::split(const string &s, char delimiter) const
     vector<string> tokens;
     int begIndex = 0;
     int subStrLen = 0;
-    cout << "s.length(): " << s.length() << endl;
-
-    
 
     for (int i = 0; i < s.length(); i++) {
         // cout << i << endl;
         // cout << s[i] << endl;
         if (s[i] == delimiter || s[i] == '\n') {
             string subString = s.substr(begIndex, subStrLen);
-            cout << subString << endl;
+            // cout << subString << endl;
             tokens.push_back(subString);
             begIndex = i + 1;
             subStrLen = 0;
@@ -262,7 +257,7 @@ vector<string> WalkSAT::split(const string &s, char delimiter) const
     }
 
     string subString = s.substr(begIndex, subStrLen);
-    cout << subString << endl;
+    // cout << subString << endl;
     tokens.push_back(subString);
 
     return tokens;
