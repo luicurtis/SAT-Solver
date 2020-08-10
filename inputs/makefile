@@ -1,4 +1,4 @@
 all:
 	
 clean:
-	rm *.txt
+	rm input*.txt
