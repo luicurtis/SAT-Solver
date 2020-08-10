@@ -1,4 +1,4 @@
-''' Generates a k-CNF sentence with m clauses and n symbols, where the clauses 
+prop_symbols''' Generates a k-CNF sentence with m clauses and n symbols, where the clauses 
     are chosen uniformly, independently, and without replacement from 
     among all clauses with k different literals, which are positive or 
     negative at random'''

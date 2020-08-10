@@ -2,7 +2,12 @@
     Edited to isolate the WalkSAT algorihtm for comparing '''
 
 import random
-from utils import probability,
+import sys
+import time
+
+def probability(p):
+    """Return true with probability p."""
+    return p > random.uniform(0.0, 1.0)
 
 def pl_true(exp, model={}):
     """Return True if the propositional logic expression is true in the model,
@@ -12,52 +17,14 @@ def pl_true(exp, model={}):
     >>> pl_true(P, {}) is None
     True
     """
-    if exp in (True, False):
-        return exp
-    op, args = exp.op, exp.args
-    if is_prop_symbol(op):
-        return model.get(exp)
-    elif op == '~':
-        p = pl_true(args[0], model)
-        if p is None:
-            return None
-        else:
-            return not p
-    elif op == '|':
-        result = False
-        for arg in args:
-            p = pl_true(arg, model)
-            if p is True:
-                return True
-            if p is None:
-                result = None
-        return result
-    elif op == '&':
-        result = True
-        for arg in args:
-            p = pl_true(arg, model)
-            if p is False:
-                return False
-            if p is None:
-                result = None
-        return result
-    p, q = args
-    if op == '==>':
-        return pl_true(~p | q, model)
-    elif op == '<==':
-        return pl_true(p | ~q, model)
-    pt = pl_true(p, model)
-    if pt is None:
-        return None
-    qt = pl_true(q, model)
-    if qt is None:
-        return None
-    if op == '<=>':
-        return pt == qt
-    elif op == '^':  # xor or 'not equivalent'
-        return pt != qt
-    else:
-        raise ValueError('Illegal operator in logic expression' + str(exp))
+    for sym in exp:
+        # clause is true (satisfied) if:
+        #   sym is positive and the model for syn is true OR
+        #   sym is negative and the model for sym is false
+        if (int(sym) > 0 and model[abs(int(sym))]) or (int(sym) < 0 and not (model[abs(int(sym))])):
+            return True
+
+    return False
 
 def prop_symbols(x):
     """Return the set of all propositional symbols in x."""
@@ -84,40 +51,100 @@ def is_symbol(s):
     return isinstance(s, str) and s[:1].isalpha()
 
 
-def WalkSAT(clauses, p=0.5, max_flips=10000):
+def WalkSAT(clauses, numClauses, numVariables, p=0.5, max_flips=10000):
     """Checks for satisfiability of all clauses by randomly flipping values of variables
-    >>> WalkSAT([A & ~A], 0.5, 100) is None
-    True
+
+        Modified: Aug 9 2020, Curtis Lui - accepts clauses in form of complete CNF
+
     """
     # Set of all symbols in all clauses
-    symbols = {sym for clause in clauses for sym in prop_symbols(clause)}
+    # print("Clauses:")
+    # print(clauses)
+    # print()
+    symbols = {i for i in range(1,int(numVariables)+1)}
+
+    # print("Symbols:")
+    # print(symbols)
+    # print()
+
     # model is a random assignment of true/false to the symbols in clauses
+
     model = {s: random.choice([True, False]) for s in symbols}
+    
+    # print("model:")
+    # print(model)
+    # print()
     for i in range(max_flips):
         satisfied, unsatisfied = [], []
         for clause in clauses:
             (satisfied if pl_true(clause, model) else unsatisfied).append(clause)
+        
+        # print("model:")
+        # print(model)
+        # print()
+
+        # print("unsatisfied:")
+        # print(unsatisfied)
+        # print()
+
         if not unsatisfied:  # if model satisfies all the clauses
             return model
+        
         clause = random.choice(unsatisfied)
+
         if probability(p):
-            sym = random.choice(list(prop_symbols(clause)))
+            sym = random.choice(clause)
         else:
             # Flip the symbol in clause that maximizes number of sat. clauses
             def sat_count(sym):
                 # Return the the number of clauses satisfied after flipping the symbol.
-                model[sym] = not model[sym]
+                model[abs(int(sym))] = not model[abs(int(sym))]
                 count = len([clause for clause in clauses if pl_true(clause, model)])
-                model[sym] = not model[sym]
+                model[abs(int(sym))] = not model[abs(int(sym))]
                 return count
 
-            sym = max(prop_symbols(clause), key=sat_count)
-        model[sym] = not model[sym]
+            sym = max(clause, key=sat_count)
+        model[abs(int(sym))] = not model[abs(int(sym))]
     # If no solution is found within the flip limit, we return failure
     return None
 
 def runWalkSat():
+    if len(sys.argv) != 2:
+        print("ERROR: Please use the executable like this: python3 walksat.py <path to CNF file>\n")
+        exit()
     
+    try:
+        f = open(str(sys.argv[1]))
+    except:
+        print(f"ERROR: '{sys.argv[1]}' could not be opened\n")
+        exit()
+
+    # parse first line info
+    line = f.readline()
+    newLine = line.split()
+    
+    numVariables = newLine[2]
+    numClauses = newLine[3]
+
+    # print(numVariables, numClauses)
+
+    clauses = []
+
+    # Create clause list
+    for line in f:
+        newLine = line.split()
+        newLine.remove('0')
+        clauses.append(newLine)
+        # print(clauses)
+
+    start_time = time.time()
+    model = WalkSAT(clauses, numVariables, numClauses)
+    elapsed_time = time.time() - start_time
+
+    print("WalkSAT Running time:", elapsed_time)
+
+    if not model:
+        print("File is unsat")
     return
 
 if __name__ == '__main__':
