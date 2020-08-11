@@ -25,14 +25,12 @@ int main(int argc, char* argv[])
     cout << "DURATION FOR RESOLUTION PROVING: " << duration.count()/1000000.0 << endl;
     
     if (!result) {
-        cout << "Could not be resolved. KB cannot be entailed.";
+        cout << "Could not be resolved. KB cannot be entailed.\n";
     }
     else
     {
         cout << "Resolved! KB can be entailed\n";
     }
-    
-
     delete resProving;
 
     return 0;
