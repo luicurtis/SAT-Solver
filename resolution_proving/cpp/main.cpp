@@ -22,11 +22,16 @@ int main(int argc, char* argv[])
 
     auto duration = duration_cast<microseconds>(stop - start);
 
-    cout << "DURATION FOR WALKSAT: " << duration.count()/1000000.0 << endl;
+    cout << "DURATION FOR RESOLUTION PROVING: " << duration.count()/1000000.0 << endl;
     
     if (!result) {
-        cout << "Could not be resolved. Unsatisfiable.";
+        cout << "Could not be resolved. KB cannot be entailed.";
     }
+    else
+    {
+        cout << "Resolved! KB can be entailed\n";
+    }
+    
 
     delete resProving;
 

@@ -9,6 +9,7 @@
 
 using namespace std;
 
+#define EMPTY_CLAUSE_INDICATOR "0"
 
 ResolutionProving::ResolutionProving()
 {
@@ -22,14 +23,40 @@ ResolutionProving::~ResolutionProving() {}
 bool ResolutionProving::solve()
 {
     map<string, set<int>> newClauses;
-    int n = 0;
+    map<string, set<int>> resolvedClauses;
+    bool noNewClausesFlag = false;
+    int past_size = 0;
 
+    // Loop until no clauses can be resolved, or an empty clause is created
     while(true) {
-        n = clauses.size();
-        
+        past_size = newClauses.size();  // keep track of number of new clauses
+
+        // Iterate all possible pairs of clauses
+        for (auto ci = clauses.begin(); ci != clauses.end(); ci++) {
+            for (auto cj = ci; cj != clauses.end(); cj++) {
+                // resolve pair of clauses
+                resolvedClauses = pl_resolve(ci->second, cj->second);
+
+                // Check if there is an empty clause created from resolving
+                if (resolvedClauses.find(EMPTY_CLAUSE_INDICATOR) != resolvedClauses.end()) {
+                    return true;
+                }
+
+                // add all resolved clauses to new
+                newClauses.insert(resolvedClauses.begin(), resolvedClauses.end());
+            }
+        }
+
+        if (newClauses.size() == past_size) {
+            // no new clauses were added since last loop
+            // Therefore, no more new clauses will be found
+            return false;
+        }
+
+        // add newClauses into master list of clauses
+        // note: map.insert() will not have duplicates
+        clauses.insert(newClauses.begin(), newClauses.end());
     }
-
-
 }
 
 /* Loads a KB from a given filePath
@@ -69,8 +96,8 @@ void ResolutionProving::loadKB(char* filePath)
     numVariables = stoi(tokens[2]);
     numClauses = stoi(tokens[3]);
 
-    cout<<numVariables<<endl;
-    cout<<numClauses<<endl;
+    // cout<<numVariables<<endl;
+    // cout<<numClauses<<endl;
 
     // Go through the clauses
     for (int i = 0; i < numClauses; i++) {
@@ -92,9 +119,9 @@ void ResolutionProving::loadKB(char* filePath)
         clauses.insert(newClause);
     }
 
-    for (auto it = clauses.begin(); it != clauses.end(); it++) {
-        cout << it->first << endl;
-    }
+    // for (auto it = clauses.begin(); it != clauses.end(); it++) {
+    //     cout << it->first << endl;
+    // }
 
     in_file.close();
 }
@@ -102,6 +129,32 @@ void ResolutionProving::loadKB(char* filePath)
 /* Returns all clauss that are resolved from ci and cj */
 map<string, set<int>> ResolutionProving::pl_resolve(const set<int> &ci, const set<int> &cj)
 {
+    map<string, set<int>> resolvedClauses;
+    set<int> temp_i;
+    set<int> newClause;
+    for (auto lit_i = ci.begin(); lit_i != ci.end(); lit_i++) {
+        for (auto lit_j = cj.begin(); lit_j != cj.end(); lit_j++) {
+            if (*lit_i == ((*lit_j  * - 1))) {
+                // remove resolving literals from clause and combine
+                temp_i = ci;
+                newClause = cj;
+
+                temp_i.erase(*lit_i);
+                newClause.erase(*lit_j);
+
+                newClause.insert(temp_i.begin(), temp_i.end());
+                string s_clause = clause_to_string(newClause);
+
+                if (newClause.size() == 0) {
+                    s_clause = "0";
+                }
+                pair<string, set<int>> newPair = make_pair(s_clause, newClause);
+                resolvedClauses.insert(newPair);
+            }
+        }
+    }
+
+    return resolvedClauses;
 
 }
 
