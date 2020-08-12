@@ -25,8 +25,13 @@ int main(int argc, char* argv[])
     cout << "DURATION FOR WALKSAT: " << duration.count()/1000000.0 << endl;
     
     if (result.size() != 0) {
-        walksat->displayModel(result);
+        cout << "Satisfiable!\n";
+        // walksat->displayModel(result);
     }
+    else {
+        cout << "Unsatisfiable!\n";
+    }
+    
     delete walksat;
 
     return 0;

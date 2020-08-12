@@ -1,4 +1,5 @@
 #include <vector>
+#include <set>
 #include <map>
 #include <string>
 #include <iostream>
@@ -49,21 +50,9 @@ map<int, bool> WalkSAT::solve(double p, int max_flips)
     
     // Determine Unsat Clauses
     for (int i = 0; i < numClauses; i++) {
-        // for (int j = 0; j < allClauses[i].size(); j ++) {
-        //     cout << allClauses[i][j] << " ";
-        // }
-        // cout << endl;
-        // for (int j = 0; j < allClauses[i].size(); j ++) {
-        //         cout << allClauses[i][j] << " ";
-        //     }
-        //     cout << endl;
         if (!(checkClause(allClauses[i], model))) {
             // clause not satisfied
-            // cout << "not satisfied";
-            unsatClauses.push_back(i); // note: i is the unique identifier for that clause
-          
-            // cout << endl;
-            // exit(EXIT_FAILURE);
+            unsatClauses.insert(i); // note: i is the unique identifier for that clause
         }
     }
 
@@ -78,14 +67,17 @@ map<int, bool> WalkSAT::solve(double p, int max_flips)
         }
 
         // Choose a random clause from unsat list
-        int unsat_index = unsatClauses[rand() % unsatClauses.size()];
-        vector<int> chosenClause = allClauses[unsat_index];
+        // https://stackoverflow.com/questions/3052788/how-to-select-a-random-element-in-stdset/3052796
+        int n = rand() % unsatClauses.size();
+        auto it = unsatClauses.begin();
+        // 'advance' the iterator n times
+        advance(it,n);
+        vector<int> chosenClause = allClauses[*it];
 
         // Randomly pick flipping algorithm with probability p
         int chosenVariable;
 
         auto prob = uniform_zero_to_one(rand_engine);
-
         if (prob > p) {
             // flip a random symbol in the clause
             chosenVariable = chosenClause[rand() % chosenClause.size()];
@@ -116,6 +108,7 @@ map<int, bool> WalkSAT::solve(double p, int max_flips)
 
             // cout << "SATCLAUSECOUNT AFTER MAXIMIZING: " << satClauseCount << endl;  
             // cout << "CHOSEN VAR TO FLIP: " << chosenVariable << endl;
+
             
         }
         
@@ -263,30 +256,26 @@ bool WalkSAT::checkClause(const vector<int>& clause, const map<int, bool>& model
 
 void WalkSAT::updateUnsatList(map<int, bool> &model, int flippedSymbol)
 {
+    // cout << "here\n" ;
     // Find all clauses with the flippedSymbol and update the unsatList
-    // for (auto it = allClauses.begin(); it != allClauses.end(); it++) {
-    //     if (symbolInClause(it->second, flippedSymbol)) {
-    //         if (checkClause(it->second, model)) {               
-    //             for (auto unsat_it = unsatClauses.begin(); unsat_it != unsatClauses.end(); unsat_it++) {
-    //                 // Check to see if the clause is in the unsat list
-    //                 if (*unsat_it == it->first) {
-    //                     cout << "ERASING\n";
-    //                     unsatClauses.erase(unsat_it); // remove the clause from the unsat list because it is satisfied
-    //                 }
-    //             }
-    //         }
-    //         else {
-    //             unsatClauses.push_back(it->first); // add clause to list if it isnt satisfied
-    //         }
-    //     }
-    // }
-    unsatClauses.clear();
-    // Determine Unsat Clauses
-    for (int i = 0; i < numClauses; i++) {
-        if (!checkClause(allClauses[i], model)) {
-            unsatClauses.push_back(i); // note: i is the unique identifier for that clause
+    for (auto it = allClauses.begin(); it != allClauses.end(); it++) {
+        if (symbolInClause(it->second, flippedSymbol)) {
+            if (checkClause(it->second, model)) {        
+                unsatClauses.erase(it->first);
+            }
+            else {
+                unsatClauses.insert(it->first); // add clause to list if it isnt satisfied
+            }
         }
     }
+    //  cout << "done\n";
+    // unsatClauses.clear();
+    // // Determine Unsat Clauses
+    // for (int i = 0; i < numClauses; i++) {
+    //     if (!checkClause(allClauses[i], model)) {
+    //         unsatClauses.push_back(i); // note: i is the unique identifier for that clause
+    //     }
+    // }
 }
 
 /* Returns a vector of tokens from s that is split by the specified delimiter */

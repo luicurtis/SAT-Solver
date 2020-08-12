@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <set> 
 
 using namespace std;
 
@@ -21,7 +22,7 @@ class WalkSAT {
         int numClauses;
         int numVariables;
         map<int, vector<int>> allClauses;   // the int uniquely idenfities each clause
-        vector<int> unsatClauses;           // the int uniquely idenfities each clause
+        set<int> unsatClauses;              // the int uniquely idenfities each clause
 
         
         int satCount(map<int, bool> &model, int symbol);
