@@ -96,9 +96,6 @@ void ResolutionProving::loadKB(char* filePath)
     numVariables = stoi(tokens[2]);
     numClauses = stoi(tokens[3]);
 
-    // cout<<numVariables<<endl;
-    // cout<<numClauses<<endl;
-
     // Go through the clauses
     for (int i = 0; i < numClauses; i++) {
         getline(in_file, newLine);
@@ -118,11 +115,6 @@ void ResolutionProving::loadKB(char* filePath)
         pair<string, set<int>> newClause = make_pair(s_clause, clause);
         clauses.insert(newClause);
     }
-
-    // for (auto it = clauses.begin(); it != clauses.end(); it++) {
-    //     cout << it->first << endl;
-    // }
-
     in_file.close();
 }
 
@@ -153,9 +145,7 @@ map<string, set<int>> ResolutionProving::pl_resolve(const set<int> &ci, const se
             }
         }
     }
-
     return resolvedClauses;
-
 }
 
 // Helper Functions
@@ -182,7 +172,6 @@ vector<string> ResolutionProving::split(const string &s, char delimiter) const
     }
 
     string subString = s.substr(begIndex, subStrLen);
-    // cout << subString << endl;
     tokens.push_back(subString);
 
     return tokens;

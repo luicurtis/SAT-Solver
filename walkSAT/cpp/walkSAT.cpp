@@ -91,27 +91,15 @@ map<int, bool> WalkSAT::solve(double p, int max_flips)
             for (int i = 0; i < chosenClause.size(); i++) {
                 tempVar = abs(chosenClause[i]);
                 if (tempVar != 0) {
-                    // cout << "TEMP VAR: " << tempVar <<endl;
-
                     int tempCount = satCount(model, tempVar);
-
-                    // cout << "TEMP COUNT: "<<tempCount << endl;
                     if (tempCount > satClauseCount) {
-                        // cout << "UPDATING SAT COUNT\n";
                         satClauseCount = tempCount;
                         chosenVariable = tempVar;
-                        // cout << "SATCLAUSECOUNT: " << satClauseCount << endl;
                     }
                 }
                 
-            }
-
-            // cout << "SATCLAUSECOUNT AFTER MAXIMIZING: " << satClauseCount << endl;  
-            // cout << "CHOSEN VAR TO FLIP: " << chosenVariable << endl;
-
-            
+            }  
         }
-        
         model[chosenVariable] = !model[chosenVariable];     // flip variable
         updateUnsatList(model, chosenVariable);
         numFlips++;
@@ -158,9 +146,6 @@ void WalkSAT::loadKB(char* filePath)
     }
     numVariables = stoi(tokens[2]);
     numClauses = stoi(tokens[3]);
-
-    // cout<<numVariables<<endl;
-    // cout<<numClauses<<endl;
 
     // Go through the clauses
     for (int i = 0; i < numClauses; i++) {
@@ -238,19 +223,12 @@ bool WalkSAT::checkClause(const vector<int>& clause, const map<int, bool>& model
         /* clause is true (satisfied) if:
          * - *it is positive and the model for that variable is true OR
          * - *it is negative and the model for that varaible is false*/
-        // cout << "current *it: " << *it << endl;
-        // cout << "model.at(abs(*it))): " << model.at(abs(*it)) << endl;
-        // cout << "(*it > 0 && model.at(abs(*it): " << (*it > 0 && model.at(abs(*it) ))<< endl;
-        // cout << "(*it > 0 && !(model.at(abs(*it)): " << (*it > 0 && !(model.at(abs(*it)))) << endl;
         if ((*it > 0 && model.at(abs(*it))) || 
             (*it < 0 && !(model.at(abs(*it))))) {
-            // Note: only one of the variables in each clause need to be true
-            
-            // cout << "satisfied\n";
+            // Note: only one of the variables in each clause need to be true       
             return true;
         }
     }
-    // cout << "NOT satisfied\n";
     return false;
 }
 
@@ -268,14 +246,6 @@ void WalkSAT::updateUnsatList(map<int, bool> &model, int flippedSymbol)
             }
         }
     }
-    //  cout << "done\n";
-    // unsatClauses.clear();
-    // // Determine Unsat Clauses
-    // for (int i = 0; i < numClauses; i++) {
-    //     if (!checkClause(allClauses[i], model)) {
-    //         unsatClauses.push_back(i); // note: i is the unique identifier for that clause
-    //     }
-    // }
 }
 
 /* Returns a vector of tokens from s that is split by the specified delimiter */
@@ -286,8 +256,6 @@ vector<string> WalkSAT::split(const string &s, char delimiter) const
     int subStrLen = 0;
 
     for (int i = 0; i < s.length(); i++) {
-        // cout << i << endl;
-        // cout << s[i] << endl;
         if (s[i] == delimiter || s[i] == '\n') {
             string subString = s.substr(begIndex, subStrLen);
             // cout << subString << endl;
@@ -301,7 +269,6 @@ vector<string> WalkSAT::split(const string &s, char delimiter) const
     }
 
     string subString = s.substr(begIndex, subStrLen);
-    // cout << subString << endl;
     tokens.push_back(subString);
 
     return tokens;

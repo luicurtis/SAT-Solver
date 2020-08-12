@@ -33,35 +33,15 @@ def WalkSAT(clauses, numClauses, numVariables, p=0.5, max_flips=10000):
         Modified: Aug 9 2020, Curtis Lui - accepts clauses in form of complete CNF
 
     """
-    # Set of all symbols in all clauses
-    # print("Clauses:")
-    # print(clauses)
-    # print()
+
     symbols = {i for i in range(1,int(numVariables)+1)}
-
-    # print("Symbols:")
-    # print(symbols)
-    # print()
-
-    # model is a random assignment of true/false to the symbols in clauses
-
     model = {s: random.choice([True, False]) for s in symbols}
     
-    # print("model:")
-    # print(model)
-    # print()
     for i in range(max_flips):
         satisfied, unsatisfied = [], []
         for clause in clauses:
             (satisfied if pl_true(clause, model) else unsatisfied).append(clause)
-        
-        # print("model:")
-        # print(model)
-        # print()
 
-        # print("unsatisfied:")
-        # print(unsatisfied)
-        # print()
 
         if not unsatisfied:  # if model satisfies all the clauses
             return model
@@ -102,8 +82,6 @@ def runWalkSat():
     numVariables = newLine[2]
     numClauses = newLine[3]
 
-    # print(numVariables, numClauses)
-
     clauses = []
 
     # Create clause list
@@ -111,7 +89,7 @@ def runWalkSat():
         newLine = line.split()
         newLine.remove('0')
         clauses.append(newLine)
-        # print(clauses)
+
 
     start_time = time.time()
     model = WalkSAT(clauses, numVariables, numClauses)
@@ -121,6 +99,8 @@ def runWalkSat():
 
     if not model:
         print("File is unsat")
+    else:
+        print("File is satisfiable")
     return
 
 if __name__ == '__main__':
